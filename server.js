@@ -24,44 +24,105 @@ app.get("/topRated", topRatedHandler);
 app.get("/upcoming", upcomingHandler);
 app.get("/similar", similarHandler);
 app.post("/addMovie", addMovieHandler);
-app.get("/getMovies",getMoviesHandler)
+app.get("/getMovies", getMoviesHandler);
+app.put("/UPDATE/:id", updateMovieHandler);
+app.delete("/DELETE/:id", deleteMovieHandler);
+app.get('/getMovie/:id', getMovie);
+app.patch("/updateMovie/:id",updateOneMovieHandler)
 
 //functions
 
 
 //http://localhost:3000/addMovie
 function addMovieHandler(req, res) {
-  
-  const { id, title, overview, release_date, poster_path, comments } = req.body;
-  let sql = `INSERT INTO movie (id,title,overview,release_date,poster_path,comments)
-VALUES($1,$2,$3,$4,$5,$6) RETURNING *;`;
-  const values = [id, title, overview, release_date, poster_path, comments];
+  const { title, overview, release_date, poster_path, comments } = req.body;
+  let sql = `INSERT INTO movie (title,overview,release_date,poster_path,comments)
+VALUES($1,$2,$3,$4,$5) RETURNING *;`;
+  const values = [title, overview, release_date, poster_path, comments];
   client
     .query(sql, values)
-    .then(result=>
-      
-      res.status(201).json(result.rows))
+    .then((result) => res.status(201).json(result.rows))
     .catch((err) => {
       console.log(err);
       res.status(500).json("error saving data");
     });
-
 }
 //http://localhost:3000/getMovies
-function getMoviesHandler(req,res){
-  const sql= "SELECT * FROM Movie;"
-  client.query(sql).then(results=>{
-    res.json(results.rows)
-  })    
+function getMoviesHandler(req, res) {
+  const sql = "SELECT * FROM movie;";
+  client
+    .query(sql)
+    .then((results) => {
+      res.json(results.rows);
+    })
     .catch((err) => {
       console.log(err);
       res.status(500).send("error saving data");
     });
 }
 
+//http://localhost:3000/UPDATE/{movie_id}
+function updateMovieHandler(req, res) {
+  let movieId = req.params.id;
+  const { title, overview, release_date, poster_path, comments } = req.body;
+  let sql = `UPDATE movie
+SET title = $1, overview = $2,release_date=$3, poster_path=$4, comments=$5 WHERE id=$6 RETURNING *`;
+  let values = [title, overview, release_date, poster_path, comments, movieId];
+  client
+    .query(sql, values)
+    .then((result) => {
+      
+      res.status(200).json({"Data updated successfully":result.rows})
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send("Error during updating:");
+    });
+}
+//http://localhost:3000/DELETE/{movie_id}
+function deleteMovieHandler(req, res) {
+  let id = req.params.id;
+  let sql = `DELETE FROM movie WHERE id= $1;`;
+  let values = [id];
+ 
+  client
+  .query(sql, values)
+  .then(() => {
+   res.send('Data deleted successfully')
+    
+  })
+  .catch((error) => {
+    console.error("Error during deletion:", error); // Log the error for inspection
+    res.status(500).send("An error occurred while deleting data. Please check the server logs for more information.");
+  });
+}
+//http://localhost:3000/getMovie/{movie_id}
+function getMovie(req,res){
+  let movieId=req.params.id;
+  let sql= 'SELECT * FROM movie WHERE id=$1 ';
+  let values=[movieId];
+  client.query(sql,values).then(result=>{
+    res.json(result.rows)
+  })
+  .catch((error) => {
+    console.log(error);
+    res.status(500).send("Internal Server Error");
+  });
+}
 
-
-
+//http://localhost:3000/updateMovie/{movie_id}/
+function updateOneMovieHandler(req,res){
+  let movieId=req.params.id;
+  let {comments}=req.body;
+  let sql=`UPDATE movie  SET comments=$1 WHERE id= $2 RETURNING *`;
+  let values=[comments,movieId];
+  client.query(sql,values).then(movie=>{
+    res.json(movie.rows);
+  }).catch((error) => {
+    console.log(error);
+    res.status(500).send("Internal Server Error");
+  });
+}
 
 
 //http://localhost:8080/

@@ -1,5 +1,5 @@
 CREATE TABLE movie(
-    id INT,
+    id serial  PRIMARY KEY,
     title VARCHAR(255),
     overview text,
     release_date DATE,
