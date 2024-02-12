@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const port = 3001;
+const port = 3000;
 let movieData = require("./Movie-Data/data.json");
 
 function Movies(title, poster_path, overview) {
@@ -21,24 +21,25 @@ function favoriteHandler(req, res) {
   res.send("Welcome to Favorite Page");
 }
 
-app.listen(port, () => {
-  console.log(`server is running and  listening on port ${port}`);
-});
 
-function handleServerError(err, req, res, next) {
+
+app.use(function (err, req, res, next) {
+
   res.status(500);
   res.json({
     status: 500,
     responseText: "Sorry, something went wrong",
   });
-}
+});
 
-function handlerError(err, req, res, next) {
+app.use(function (req, res, next) {
   res.status(404);
   res.json({
     status: 404,
-    responseText: "Sorry, something went wrong",
+    responseText: "Sorry, the requested resource was not found",
   });
-}
-app.use(handlerError);
-app.use(handleServerError);
+});
+
+app.listen(port, () => {
+  console.log(`server is running and  listening on port ${port}`);
+});
