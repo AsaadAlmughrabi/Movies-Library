@@ -4,8 +4,12 @@
 
 ## WRRC
 
-<!-- ![WRRC](./images/WWRC_DB.png) -->
-![WWRC_metods](./images/WWRC_methods.png)
+
+
+![WWRC_methods](./images/WWRC_methods.png)
+
+
+
 
 ## Overview
 
