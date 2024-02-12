@@ -4,7 +4,12 @@
 
 ## WRRC
 
-![WRRC](./images/WWRC_DB.png)
+
+
+![WWRC_methods](./images/WWRC_methods.png)
+
+
+
 
 ## Overview
 
@@ -29,14 +34,16 @@
 - add routes
 - send req from server to api using axios
 
-#### Connect the server to database:
+#### Connect the server to database and added routes:
 * prepare the database on your diveice and create it using Cmd CREATE TABLE
 * psql dbName to enter your db
 * create file .sql and create table
 * install package  pg to connect node to postgres
 * require pg and  create connection with {host, user, password, database}
 * install  body parser for handling request body
-* we added two routes  one for get data (movies) and another for post data (add movie).
+*  added two routes  one for get data (movies) and another for post data (add movie).
+* add another three routes update movie by id(UPDATE), delete Movie by id(DELETE) and get by id (getMovieById)
+* update sepicefic movie by id using patch method to update one thing  in specific movie.
 
 ## Project Features
 
