@@ -4,14 +4,17 @@ const app = express();
 const cors = require("cors");
 const axios = require("axios");
 const { Client } = require("pg");
-const url = `postgres://asaad:1234@localhost:5432/movies`;
+const userName = process.env.USER_NAME;
+const password = process.env.PASSWORD;
+//const url = `postgres://asaad:${password}@localhost:5432/movies`;
+const url=`postgres://fkrtojql:O7SHNXrmb9AQdpOh6D9DQ3JhGQlQrnfL@trumpet.db.elephantsql.com/fkrtojql`
 const client = new Client(url);
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 require("dotenv").config();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 const apiKey = process.env.API_KEY;
 let movieData = require("./Movie-Data/data.json");
 
@@ -27,11 +30,10 @@ app.post("/addMovie", addMovieHandler);
 app.get("/getMovies", getMoviesHandler);
 app.put("/UPDATE/:id", updateMovieHandler);
 app.delete("/DELETE/:id", deleteMovieHandler);
-app.get('/getMovie/:id', getMovie);
-app.patch("/updateMovie/:id",updateOneMovieHandler)
+app.get("/getMovie/:id", getMovie);
+app.patch("/updateMovie/:id", updateOneMovieHandler);
 
 //functions
-
 
 //http://localhost:3000/addMovie
 function addMovieHandler(req, res) {
@@ -71,8 +73,7 @@ SET title = $1, overview = $2,release_date=$3, poster_path=$4, comments=$5 WHERE
   client
     .query(sql, values)
     .then((result) => {
-      
-      res.status(200).json({"Data updated successfully":result.rows})
+      res.status(200).json({ "Data updated successfully": result.rows });
     })
     .catch((err) => {
       console.log(err);
@@ -84,46 +85,53 @@ function deleteMovieHandler(req, res) {
   let id = req.params.id;
   let sql = `DELETE FROM movie WHERE id= $1;`;
   let values = [id];
- 
+
   client
-  .query(sql, values)
-  .then(() => {
-   res.send('Data deleted successfully')
-    
-  })
-  .catch((error) => {
-    console.error("Error during deletion:", error); // Log the error for inspection
-    res.status(500).send("An error occurred while deleting data. Please check the server logs for more information.");
-  });
+    .query(sql, values)
+    .then(() => {
+      res.send("Data deleted successfully");
+    })
+    .catch((error) => {
+      console.error("Error during deletion:", error); // Log the error for inspection
+      res
+        .status(500)
+        .send(
+          "An error occurred while deleting data. Please check the server logs for more information."
+        );
+    });
 }
 //http://localhost:3000/getMovie/{movie_id}
-function getMovie(req,res){
-  let movieId=req.params.id;
-  let sql= 'SELECT * FROM movie WHERE id=$1 ';
-  let values=[movieId];
-  client.query(sql,values).then(result=>{
-    res.json(result.rows)
-  })
-  .catch((error) => {
-    console.log(error);
-    res.status(500).send("Internal Server Error");
-  });
+function getMovie(req, res) {
+  let movieId = req.params.id;
+  let sql = "SELECT * FROM movie WHERE id=$1 ";
+  let values = [movieId];
+  client
+    .query(sql, values)
+    .then((result) => {
+      res.json(result.rows);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).send("Internal Server Error");
+    });
 }
 
 //http://localhost:3000/updateMovie/{movie_id}/
-function updateOneMovieHandler(req,res){
-  let movieId=req.params.id;
-  let {comments}=req.body;
-  let sql=`UPDATE movie  SET comments=$1 WHERE id= $2 RETURNING *`;
-  let values=[comments,movieId];
-  client.query(sql,values).then(movie=>{
-    res.json(movie.rows);
-  }).catch((error) => {
-    console.log(error);
-    res.status(500).send("Internal Server Error");
-  });
+function updateOneMovieHandler(req, res) {
+  let movieId = req.params.id;
+  let { comments } = req.body;
+  let sql = `UPDATE movie  SET comments=$1 WHERE id= $2 RETURNING *`;
+  let values = [comments, movieId];
+  client
+    .query(sql, values)
+    .then((movie) => {
+      res.json(movie.rows);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).send("Internal Server Error");
+    });
 }
-
 
 //http://localhost:8080/
 function homePageHandler(req, res) {
@@ -280,26 +288,23 @@ function Trending(id, title, release_date, poster_path, overview) {
 }
 
 // 500 error handler
-function handleServerError(err, req, res, next) {
+app.use(function (err, req, res, next) {
   res.status(500);
   res.json({
     status: 500,
     responseText: "Sorry, something went wrong",
   });
-}
-
-//404 error handler
-function handlerError(err, req, res, next) {
+});
+// 404 error handler
+app.use(function (req, res, next) {
   res.status(404);
   res.json({
     status: 404,
-    responseText: "Sorry, something went wrong",
+    responseText: "Sorry, the requested resource was not found",
   });
-}
+});
 
-app.use(handlerError);
-app.use(handleServerError);
-
+//listener
 client
   .connect()
   .then(() =>
@@ -307,7 +312,4 @@ client
       console.log(`server is running and  listening on port ${port}`);
     })
   )
-  .catch((error) => {
-    console.log(error);
-    res.status(500).send("Internal Server Error");
-  });
+  .catch();
