@@ -2,6 +2,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+app.use(cors())
 const axios = require("axios");
 const { Client } = require("pg");
 const userName = process.env.USER_NAME;
@@ -14,7 +15,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 require("dotenv").config();
-const port = process.env.PORT;
+const port = process.env.PORT || 3004;
+
 const apiKey = process.env.API_KEY;
 let movieData = require("./Movie-Data/data.json");
 
@@ -150,7 +152,7 @@ function favoriteHandler(req, res) {
 
 //http://localhost:8080/trending
 function trendingHandler(req, res) {
-  let url = `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}`;
+  let url = `https://api.themoviedb.org/3/trending/movie/week?api_key=b680a8c57e581af57f19a35dd243aed5`;
   //axsios
   axios
     .get(url)
